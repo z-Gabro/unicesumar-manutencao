@@ -105,7 +105,7 @@ O e-mail deve incluir em cópia (CC) o endereço de e-mail de todos os integrant
 
 ### Trabalho em Grupo
 
-Os trabalhos podem ser realizados em grupos de até 5 participantes.
+Os trabalhos podem ser realizados em grupos de até 6 participantes.
 
 ### Participação Individual
 
