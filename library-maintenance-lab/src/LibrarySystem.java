@@ -16,50 +16,74 @@ public class LibrarySystem {
     private boolean running = true;
     private int menuCounter = 0;
 
+    private static final String DEFAULT_CHANNEL = "email";
+    private static final String DEFAULT_SOURCE = "main";
+    private static final String DEFAULT_HANDLER = "handle";
+
     public LibrarySystem() {
         LegacyDatabase.seedInitialData();
     }
 
     public void startCli() {
         DataUtil.printHeader(systemName);
+
         while (running) {
             try {
-                showMenu();
-                String option = DataUtil.readLine("Select option: ");
-                menuCounter++;
-
-                if ("1".equals(option)) {
-                    handleRegisterBook();
-                } else if ("2".equals(option)) {
-                    handleRegisterUser();
-                } else if ("3".equals(option)) {
-                    handleBorrowBook();
-                } else if ("4".equals(option)) {
-                    handleReturnBook();
-                } else if ("5".equals(option)) {
-                    handleListBooks();
-                } else if ("6".equals(option)) {
-                    handleGenerateReport();
-                } else if ("7".equals(option)) {
-                    handleListUsers();
-                } else if ("8".equals(option)) {
-                    handleListLoans();
-                } else if ("9".equals(option)) {
-                    handleDebugArea();
-                } else if ("0".equals(option)) {
-                    running = false;
-                    System.out.println("bye");
-                } else {
-                    System.out.println("invalid option");
-                }
-
-                if (menuCounter % 3 == 0) {
-                    LegacyDatabase.clearLogsIfTooBig();
-                }
+                processMenu();
             } catch (Exception e) {
                 System.out.println("General system error: " + e.getMessage());
                 LegacyDatabase.addLog("system-main-loop-error-" + e.getMessage());
             }
+        }
+    }
+
+    private void executeOption(String option) {
+        switch (option) {
+            case "1":
+                handleRegisterBook();
+                break;
+            case "2":
+                handleRegisterUser();
+                break;
+            case "3":
+                handleBorrowBook();
+                break;
+            case "4":
+                handleReturnBook();
+                break;
+            case "5":
+                handleListBooks();
+                break;
+            case "6":
+                handleGenerateReport();
+                break;
+            case "7":
+                handleListUsers();
+                break;
+            case "8":
+                handleListLoans();
+                break;
+            case "9":
+                handleDebugArea();
+                break;
+            case "0":
+                running = false;
+                System.out.println("bye");
+                break;
+            default:
+                System.out.println("invalid option");
+        }
+    }
+
+    private void processMenu() {
+        showMenu();
+        String option = DataUtil.readLine("Select option: ");
+        menuCounter++;
+
+        executeOption(option);
+
+        if (menuCounter % 3 == 0) {
+            LegacyDatabase.clearLogsIfTooBig();
         }
     }
 
@@ -80,7 +104,6 @@ public class LibrarySystem {
 
     public void handleRegisterBook() {
         try {
-            // duplicate validation style in manager
             String title = DataUtil.readLine("Title: ");
             String author = DataUtil.readLine("Author: ");
             int year = DataUtil.askInt("Year: ", 2000);
@@ -90,23 +113,8 @@ public class LibrarySystem {
             String shelfCode = DataUtil.ask("Shelf code: ", "X0");
             String isbn = DataUtil.ask("ISBN: ", "NO-ISBN");
 
-            if (DataUtil.isBlank(title)) {
-                throw new RuntimeException("title blank");
-            }
-            if (DataUtil.isBlank(author)) {
-                throw new RuntimeException("author blank");
-            }
-            if (year <= 0) {
-                year = 2000;
-            }
-            if (total <= 0) {
-                total = 1;
-            }
-            if (available < 0) {
-                available = total;
-            }
-
             int id = bookManager.registerBook(title, author, year, category, total, available, shelfCode, isbn);
+
             System.out.println("Book registered with id " + id);
 
             if (id % 2 == 0) {
@@ -114,6 +122,7 @@ public class LibrarySystem {
             } else {
                 LegacyDatabase.addLog("book-odd-id");
             }
+
         } catch (Exception e) {
             System.out.println("Error register book: " + e.getMessage());
             LegacyDatabase.addLog("handle-register-book-error");
@@ -139,16 +148,18 @@ public class LibrarySystem {
     }
 
     public void handleBorrowBook() {
+
         try {
             int userId = DataUtil.askInt("User ID: ", -1);
             int bookId = DataUtil.askInt("Book ID: ", -1);
             String borrowDate = DataUtil.ask("Borrow date: ", DataUtil.nowDate());
             String dueDate = DataUtil.ask("Due date: ", DataUtil.datePlusDaysApprox(borrowDate, 14));
-            String channel = DataUtil.ask("Channel (email/sms): ", "email");
+            String channel = DataUtil.ask("Channel (email/sms): ", DEFAULT_CHANNEL);
             int maxDays = DataUtil.askInt("Max days: ", 14);
             int policyCode = DataUtil.askInt("Policy code: ", 0);
 
-            int loanId = loanManager.borrowBook(userId, bookId, borrowDate, dueDate, channel, maxDays, "main", policyCode);
+            int loanId = loanManager.borrowBook(userId, bookId, borrowDate, dueDate, channel, maxDays, "main",
+                    policyCode);
             System.out.println("Loan id " + loanId + " created.");
         } catch (Exception e) {
             System.out.println("Error borrow: " + e.getMessage());
@@ -160,10 +171,10 @@ public class LibrarySystem {
         try {
             int loanId = DataUtil.askInt("Loan ID: ", -1);
             String returnDate = DataUtil.ask("Return date: ", DataUtil.nowDate());
-            String channel = DataUtil.ask("Channel: ", "email");
+            String channel = DataUtil.ask("Channel: ", DEFAULT_CHANNEL);
             int forceFlag = DataUtil.askInt("Force flag (0/1/2): ", 0);
 
-            loanManager.returnBook(loanId, returnDate, channel, forceFlag, "main", "handle");
+            loanManager.returnBook(loanId, returnDate, channel, forceFlag, DEFAULT_SOURCE, DEFAULT_HANDLER);
             System.out.println("Return completed");
         } catch (Exception e) {
             System.out.println("Error return: " + e.getMessage());
@@ -221,7 +232,6 @@ public class LibrarySystem {
         }
     }
 
-    // Long method with deep nesting and mixed concerns
     public void handleDebugArea() {
         DataUtil.printHeader("Debug Area (Legacy)");
         System.out.println("1-Print logs");
@@ -231,65 +241,74 @@ public class LibrarySystem {
         System.out.println("5-Loan histogram");
         System.out.println("6-Manual notify");
         System.out.println("0-Back");
+
         String option = DataUtil.readLine("Debug option: ");
 
         if ("1".equals(option)) {
             LegacyDatabase.printLogs();
-        } else {
-            if ("2".equals(option)) {
-                LegacyDatabase.dumpState();
-            } else {
-                if ("3".equals(option)) {
-                    String mode = DataUtil.readLine("New mode: ");
-                    if (!DataUtil.isBlank(mode)) {
-                        LegacyDatabase.setSystemMode(mode);
-                        System.out.println("mode changed");
-                    } else {
-                        System.out.println("mode blank");
-                    }
-                } else {
-                    if ("4".equals(option)) {
-                        String target = DataUtil.readLine("Target (book/user): ");
-                        int id = DataUtil.askInt("Id: ", -1);
-                        String field = DataUtil.readLine("Field: ");
-                        String value = DataUtil.readLine("Value: ");
-
-                        if ("book".equals(target)) {
-                            LegacyDatabase.unsafeUpdateBookField(id, field, value);
-                            System.out.println("book updated");
-                        } else {
-                            if ("user".equals(target)) {
-                                LegacyDatabase.unsafeUpdateUserField(id, field, value);
-                                System.out.println("user updated");
-                            } else {
-                                System.out.println("unknown target");
-                            }
-                        }
-                    } else {
-                        if ("5".equals(option)) {
-                            reportGenerator.printLoanHistogram();
-                        } else {
-                            if ("6".equals(option)) {
-                                String x = DataUtil.ask("x: ", "x");
-                                String y = DataUtil.ask("y: ", "y");
-                                String z = DataUtil.ask("z: ", "z");
-                                int p = DataUtil.askInt("priority: ", 1);
-                                int r = DataUtil.askInt("retry: ", 0);
-                                notificationService.genericNotify(x, y, z, p, r, "debug");
-                            } else {
-                                if ("0".equals(option)) {
-                                    System.out.println("back");
-                                } else {
-                                    System.out.println("invalid debug option");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            return;
         }
 
-        // TODO: remove this debug area in future refactor
+        if ("2".equals(option)) {
+            LegacyDatabase.dumpState();
+            return;
+        }
+
+        if ("3".equals(option)) {
+            String mode = DataUtil.readLine("New mode: ");
+            if (!DataUtil.isBlank(mode)) {
+                LegacyDatabase.setSystemMode(mode);
+                System.out.println("mode changed");
+            } else {
+                System.out.println("mode blank");
+            }
+            return;
+        }
+
+        if ("4".equals(option)) {
+            String target = DataUtil.readLine("Target (book/user): ");
+            int id = DataUtil.askInt("Id: ", -1);
+            String field = DataUtil.readLine("Field: ");
+            String value = DataUtil.readLine("Value: ");
+
+            if ("book".equals(target)) {
+                LegacyDatabase.unsafeUpdateBookField(id, field, value);
+                System.out.println("book updated");
+                return;
+            }
+
+            if ("user".equals(target)) {
+                LegacyDatabase.unsafeUpdateUserField(id, field, value);
+                System.out.println("user updated");
+                return;
+            }
+
+            System.out.println("unknown target");
+            return;
+        }
+
+        if ("5".equals(option)) {
+            reportGenerator.printLoanHistogram();
+            return;
+        }
+
+        if ("6".equals(option)) {
+            String x = DataUtil.ask("x: ", "x");
+            String y = DataUtil.ask("y: ", "y");
+            String z = DataUtil.ask("z: ", "z");
+            int p = DataUtil.askInt("priority: ", 1);
+            int r = DataUtil.askInt("retry: ", 0);
+
+            notificationService.genericNotify(x, y, z, p, r, "debug");
+            return;
+        }
+
+        if ("0".equals(option)) {
+            System.out.println("back");
+            return;
+        }
+
+        System.out.println("invalid debug option");
     }
 
     public void runDemoScenario() {
@@ -299,7 +318,8 @@ public class LibrarySystem {
             int idBook = bookManager.registerBook("Legacy Java", "Unknown", 2010, "CS", 2, 2, "B1", "ISBN-999");
             int idUser = userManager.registerUser("Carlos", "carlos@mail.com", "3333-3333", "student", "Maringa",
                     "DOC-3", "ACTIVE");
-            int loanId = loanManager.borrowBook(idUser, idBook, DataUtil.nowDate(), DataUtil.datePlusDaysApprox(DataUtil.nowDate(), 14),
+            int loanId = loanManager.borrowBook(idUser, idBook, DataUtil.nowDate(),
+                    DataUtil.datePlusDaysApprox(DataUtil.nowDate(), 14),
                     "email", 14, "demo", 0);
             loanManager.returnBook(loanId, DataUtil.nowDate(), "email", 0, "demo", "handler");
         } catch (Exception e) {
