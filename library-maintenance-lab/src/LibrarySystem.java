@@ -22,44 +22,64 @@ public class LibrarySystem {
 
     public void startCli() {
         DataUtil.printHeader(systemName);
+
         while (running) {
             try {
-                showMenu();
-                String option = DataUtil.readLine("Select option: ");
-                menuCounter++;
-
-                if ("1".equals(option)) {
-                    handleRegisterBook();
-                } else if ("2".equals(option)) {
-                    handleRegisterUser();
-                } else if ("3".equals(option)) {
-                    handleBorrowBook();
-                } else if ("4".equals(option)) {
-                    handleReturnBook();
-                } else if ("5".equals(option)) {
-                    handleListBooks();
-                } else if ("6".equals(option)) {
-                    handleGenerateReport();
-                } else if ("7".equals(option)) {
-                    handleListUsers();
-                } else if ("8".equals(option)) {
-                    handleListLoans();
-                } else if ("9".equals(option)) {
-                    handleDebugArea();
-                } else if ("0".equals(option)) {
-                    running = false;
-                    System.out.println("bye");
-                } else {
-                    System.out.println("invalid option");
-                }
-
-                if (menuCounter % 3 == 0) {
-                    LegacyDatabase.clearLogsIfTooBig();
-                }
+                processMenu();
             } catch (Exception e) {
                 System.out.println("General system error: " + e.getMessage());
                 LegacyDatabase.addLog("system-main-loop-error-" + e.getMessage());
             }
+        }
+    }
+
+    private void executeOption(String option) {
+        switch (option) {
+            case "1":
+                handleRegisterBook();
+                break;
+            case "2":
+                handleRegisterUser();
+                break;
+            case "3":
+                handleBorrowBook();
+                break;
+            case "4":
+                handleReturnBook();
+                break;
+            case "5":
+                handleListBooks();
+                break;
+            case "6":
+                handleGenerateReport();
+                break;
+            case "7":
+                handleListUsers();
+                break;
+            case "8":
+                handleListLoans();
+                break;
+            case "9":
+                handleDebugArea();
+                break;
+            case "0":
+                running = false;
+                System.out.println("bye");
+                break;
+            default:
+                System.out.println("invalid option");
+        }
+    }
+
+    private void processMenu() {
+        showMenu();
+        String option = DataUtil.readLine("Select option: ");
+        menuCounter++;
+
+        executeOption(option);
+
+        if (menuCounter % 3 == 0) {
+            LegacyDatabase.clearLogsIfTooBig();
         }
     }
 
