@@ -100,7 +100,6 @@ public class LibrarySystem {
 
     public void handleRegisterBook() {
         try {
-            // duplicate validation style in manager
             String title = DataUtil.readLine("Title: ");
             String author = DataUtil.readLine("Author: ");
             int year = DataUtil.askInt("Year: ", 2000);
@@ -110,23 +109,8 @@ public class LibrarySystem {
             String shelfCode = DataUtil.ask("Shelf code: ", "X0");
             String isbn = DataUtil.ask("ISBN: ", "NO-ISBN");
 
-            if (DataUtil.isBlank(title)) {
-                throw new RuntimeException("title blank");
-            }
-            if (DataUtil.isBlank(author)) {
-                throw new RuntimeException("author blank");
-            }
-            if (year <= 0) {
-                year = 2000;
-            }
-            if (total <= 0) {
-                total = 1;
-            }
-            if (available < 0) {
-                available = total;
-            }
-
             int id = bookManager.registerBook(title, author, year, category, total, available, shelfCode, isbn);
+
             System.out.println("Book registered with id " + id);
 
             if (id % 2 == 0) {
@@ -134,6 +118,7 @@ public class LibrarySystem {
             } else {
                 LegacyDatabase.addLog("book-odd-id");
             }
+
         } catch (Exception e) {
             System.out.println("Error register book: " + e.getMessage());
             LegacyDatabase.addLog("handle-register-book-error");
