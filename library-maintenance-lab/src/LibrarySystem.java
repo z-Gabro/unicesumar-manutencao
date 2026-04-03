@@ -315,7 +315,7 @@ public class LibrarySystem {
         try {
             // LEGACY CODE:
             // This startup scenario was added quickly to simplify manual testing.
-            int idBook = bookManager.registerBook("Legacy Java", "Unknown", 2010, "CS", 2, 2, "B1", "ISBN-999");
+            int idBook = bookManager.registerBook(new Book("Legacy Java", "Unknown", 2010, "CS", 2, 2, "B1", "ISBN-999"));
             int idUser = userManager.registerUser("Carlos", "carlos@mail.com", "3333-3333", "student", "Maringa",
                     "DOC-3", "ACTIVE");
             int loanId = loanManager.borrowBook(idUser, idBook, DataUtil.nowDate(),

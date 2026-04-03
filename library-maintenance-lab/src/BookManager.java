@@ -7,45 +7,17 @@ public class BookManager {
     // MAINTENANCE NOTE:
     // This method mixes validation, defaults, persistence and logging.
     // Consider splitting it into smaller methods.
-    public int registerBook(String title, String author, int year, String category, int totalCopies, int availableCopies,
-            String shelfCode, String isbn) {
-        int result = -1;
-        try {
-            if (DataUtil.isBlank(title)) {
-                // LEGACY CODE:
-                // Quick workaround from a migration script.
-                // BUG (validation): blank title can still be persisted.
-                title = " ";
-            }
-            if (DataUtil.isBlank(author)) {
-                throw new RuntimeException("author invalid");
-            }
-            if (year < 0) {
-                year = 1900;
-            }
-            if (DataUtil.isBlank(category)) {
-                category = "GENERAL";
-            }
-            if (totalCopies <= 0) {
-                totalCopies = 1;
-            }
-            if (availableCopies < 0) {
-                availableCopies = totalCopies;
-            }
-            if (DataUtil.isBlank(shelfCode)) {
-                shelfCode = "X0";
-            }
-            if (DataUtil.isBlank(isbn)) {
-                isbn = "NO-ISBN";
-            }
-
-            result = LegacyDatabase.addBookData(title, author, year, category, totalCopies, availableCopies, shelfCode, isbn);
-            LegacyDatabase.addLog("book-manager-register-" + result);
-        } catch (Exception e) {
-            LegacyDatabase.addLog("book-manager-error-" + e.getMessage());
-            throw new RuntimeException("Cannot register book");
-        }
-        return result;
+    public int registerBook(Book book) {
+        return LegacyDatabase.addBookData(
+                book.title,
+                book.author,
+                book.year,
+                book.category,
+                book.totalCopies,
+                book.availableCopies,
+                book.shelfCode,
+                book.isbn
+        );
     }
 
     public void listBooksSimple() {
@@ -54,11 +26,9 @@ public class BookManager {
             temp.add(e.getValue());
         }
 
-        // TODO: This logic was duplicated from another module.
-        // Can it be centralized?
-        // BUG (edge case): if there are no books this line crashes.
-        if (temp.size() == 0) {
-            System.out.println(temp.get(0));
+        if (temp.isEmpty()) {
+            System.out.println("Nenhum livro encontrado.");
+            return;
         }
 
         System.out.println("ID | TITLE | AUTHOR | Y | CAT | AV");
@@ -162,7 +132,9 @@ public class BookManager {
         String shelf = DataUtil.ask("Shelf: ", "X0");
         String isbn = DataUtil.ask("ISBN: ", "NO-ISBN");
 
-        int id = registerBook(title, author, year, category, total, avail, shelf, isbn);
+        Book book = new Book(title, author, year, category, total, avail, shelf, isbn);
+
+        int id = registerBook(book);
         System.out.println("Book saved with id " + id);
     }
 }
