@@ -113,7 +113,7 @@ public class LibrarySystem {
             String shelfCode = DataUtil.ask("Shelf code: ", "X0");
             String isbn = DataUtil.ask("ISBN: ", "NO-ISBN");
 
-            int id = bookManager.registerBook(title, author, year, category, total, available, shelfCode, isbn);
+            int id = bookManager.registerBook(new Book(title, author, year, category, total, available, shelfCode, isbn));
 
             System.out.println("Book registered with id " + id);
 
