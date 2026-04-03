@@ -148,7 +148,8 @@ public class LibrarySystem {
             int maxDays = DataUtil.askInt("Max days: ", 14);
             int policyCode = DataUtil.askInt("Policy code: ", 0);
 
-            int loanId = loanManager.borrowBook(userId, bookId, borrowDate, dueDate, channel, maxDays, "main", policyCode);
+            int loanId = loanManager.borrowBook(userId, bookId, borrowDate, dueDate, channel, maxDays, "main",
+                    policyCode);
             System.out.println("Loan id " + loanId + " created.");
         } catch (Exception e) {
             System.out.println("Error borrow: " + e.getMessage());
@@ -221,7 +222,6 @@ public class LibrarySystem {
         }
     }
 
-    // Long method with deep nesting and mixed concerns
     public void handleDebugArea() {
         DataUtil.printHeader("Debug Area (Legacy)");
         System.out.println("1-Print logs");
@@ -231,65 +231,74 @@ public class LibrarySystem {
         System.out.println("5-Loan histogram");
         System.out.println("6-Manual notify");
         System.out.println("0-Back");
+
         String option = DataUtil.readLine("Debug option: ");
 
         if ("1".equals(option)) {
             LegacyDatabase.printLogs();
-        } else {
-            if ("2".equals(option)) {
-                LegacyDatabase.dumpState();
-            } else {
-                if ("3".equals(option)) {
-                    String mode = DataUtil.readLine("New mode: ");
-                    if (!DataUtil.isBlank(mode)) {
-                        LegacyDatabase.setSystemMode(mode);
-                        System.out.println("mode changed");
-                    } else {
-                        System.out.println("mode blank");
-                    }
-                } else {
-                    if ("4".equals(option)) {
-                        String target = DataUtil.readLine("Target (book/user): ");
-                        int id = DataUtil.askInt("Id: ", -1);
-                        String field = DataUtil.readLine("Field: ");
-                        String value = DataUtil.readLine("Value: ");
-
-                        if ("book".equals(target)) {
-                            LegacyDatabase.unsafeUpdateBookField(id, field, value);
-                            System.out.println("book updated");
-                        } else {
-                            if ("user".equals(target)) {
-                                LegacyDatabase.unsafeUpdateUserField(id, field, value);
-                                System.out.println("user updated");
-                            } else {
-                                System.out.println("unknown target");
-                            }
-                        }
-                    } else {
-                        if ("5".equals(option)) {
-                            reportGenerator.printLoanHistogram();
-                        } else {
-                            if ("6".equals(option)) {
-                                String x = DataUtil.ask("x: ", "x");
-                                String y = DataUtil.ask("y: ", "y");
-                                String z = DataUtil.ask("z: ", "z");
-                                int p = DataUtil.askInt("priority: ", 1);
-                                int r = DataUtil.askInt("retry: ", 0);
-                                notificationService.genericNotify(x, y, z, p, r, "debug");
-                            } else {
-                                if ("0".equals(option)) {
-                                    System.out.println("back");
-                                } else {
-                                    System.out.println("invalid debug option");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            return;
         }
 
-        // TODO: remove this debug area in future refactor
+        if ("2".equals(option)) {
+            LegacyDatabase.dumpState();
+            return;
+        }
+
+        if ("3".equals(option)) {
+            String mode = DataUtil.readLine("New mode: ");
+            if (!DataUtil.isBlank(mode)) {
+                LegacyDatabase.setSystemMode(mode);
+                System.out.println("mode changed");
+            } else {
+                System.out.println("mode blank");
+            }
+            return;
+        }
+
+        if ("4".equals(option)) {
+            String target = DataUtil.readLine("Target (book/user): ");
+            int id = DataUtil.askInt("Id: ", -1);
+            String field = DataUtil.readLine("Field: ");
+            String value = DataUtil.readLine("Value: ");
+
+            if ("book".equals(target)) {
+                LegacyDatabase.unsafeUpdateBookField(id, field, value);
+                System.out.println("book updated");
+                return;
+            }
+
+            if ("user".equals(target)) {
+                LegacyDatabase.unsafeUpdateUserField(id, field, value);
+                System.out.println("user updated");
+                return;
+            }
+
+            System.out.println("unknown target");
+            return;
+        }
+
+        if ("5".equals(option)) {
+            reportGenerator.printLoanHistogram();
+            return;
+        }
+
+        if ("6".equals(option)) {
+            String x = DataUtil.ask("x: ", "x");
+            String y = DataUtil.ask("y: ", "y");
+            String z = DataUtil.ask("z: ", "z");
+            int p = DataUtil.askInt("priority: ", 1);
+            int r = DataUtil.askInt("retry: ", 0);
+
+            notificationService.genericNotify(x, y, z, p, r, "debug");
+            return;
+        }
+
+        if ("0".equals(option)) {
+            System.out.println("back");
+            return;
+        }
+
+        System.out.println("invalid debug option");
     }
 
     public void runDemoScenario() {
@@ -299,7 +308,8 @@ public class LibrarySystem {
             int idBook = bookManager.registerBook("Legacy Java", "Unknown", 2010, "CS", 2, 2, "B1", "ISBN-999");
             int idUser = userManager.registerUser("Carlos", "carlos@mail.com", "3333-3333", "student", "Maringa",
                     "DOC-3", "ACTIVE");
-            int loanId = loanManager.borrowBook(idUser, idBook, DataUtil.nowDate(), DataUtil.datePlusDaysApprox(DataUtil.nowDate(), 14),
+            int loanId = loanManager.borrowBook(idUser, idBook, DataUtil.nowDate(),
+                    DataUtil.datePlusDaysApprox(DataUtil.nowDate(), 14),
                     "email", 14, "demo", 0);
             loanManager.returnBook(loanId, DataUtil.nowDate(), "email", 0, "demo", "handler");
         } catch (Exception e) {
