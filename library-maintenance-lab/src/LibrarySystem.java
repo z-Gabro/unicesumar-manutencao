@@ -106,7 +106,7 @@ public class LibrarySystem {
                 available = total;
             }
 
-            int id = bookManager.registerBook(title, author, year, category, total, available, shelfCode, isbn);
+            int id = bookManager.registerBook(new Book (title, author, year, category, total, available, shelfCode, isbn));
             System.out.println("Book registered with id " + id);
 
             if (id % 2 == 0) {
@@ -296,7 +296,7 @@ public class LibrarySystem {
         try {
             // LEGACY CODE:
             // This startup scenario was added quickly to simplify manual testing.
-            int idBook = bookManager.registerBook("Legacy Java", "Unknown", 2010, "CS", 2, 2, "B1", "ISBN-999");
+            int idBook = bookManager.registerBook(new Book("Legacy Java", "Unknown", 2010, "CS", 2, 2, "B1", "ISBN-999"));
             int idUser = userManager.registerUser("Carlos", "carlos@mail.com", "3333-3333", "student", "Maringa",
                     "DOC-3", "ACTIVE");
             int loanId = loanManager.borrowBook(idUser, idBook, DataUtil.nowDate(), DataUtil.datePlusDaysApprox(DataUtil.nowDate(), 14),
