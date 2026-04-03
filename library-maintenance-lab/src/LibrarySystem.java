@@ -16,6 +16,10 @@ public class LibrarySystem {
     private boolean running = true;
     private int menuCounter = 0;
 
+    private static final String DEFAULT_CHANNEL = "email";
+    private static final String DEFAULT_SOURCE = "main";
+    private static final String DEFAULT_HANDLER = "handle";
+
     public LibrarySystem() {
         LegacyDatabase.seedInitialData();
     }
@@ -144,12 +148,13 @@ public class LibrarySystem {
     }
 
     public void handleBorrowBook() {
+
         try {
             int userId = DataUtil.askInt("User ID: ", -1);
             int bookId = DataUtil.askInt("Book ID: ", -1);
             String borrowDate = DataUtil.ask("Borrow date: ", DataUtil.nowDate());
             String dueDate = DataUtil.ask("Due date: ", DataUtil.datePlusDaysApprox(borrowDate, 14));
-            String channel = DataUtil.ask("Channel (email/sms): ", "email");
+            String channel = DataUtil.ask("Channel (email/sms): ", DEFAULT_CHANNEL);
             int maxDays = DataUtil.askInt("Max days: ", 14);
             int policyCode = DataUtil.askInt("Policy code: ", 0);
 
@@ -166,10 +171,10 @@ public class LibrarySystem {
         try {
             int loanId = DataUtil.askInt("Loan ID: ", -1);
             String returnDate = DataUtil.ask("Return date: ", DataUtil.nowDate());
-            String channel = DataUtil.ask("Channel: ", "email");
+            String channel = DataUtil.ask("Channel: ", DEFAULT_CHANNEL);
             int forceFlag = DataUtil.askInt("Force flag (0/1/2): ", 0);
 
-            loanManager.returnBook(loanId, returnDate, channel, forceFlag, "main", "handle");
+            loanManager.returnBook(loanId, returnDate, channel, forceFlag, DEFAULT_SOURCE, DEFAULT_HANDLER);
             System.out.println("Return completed");
         } catch (Exception e) {
             System.out.println("Error return: " + e.getMessage());
