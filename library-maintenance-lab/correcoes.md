@@ -1,6 +1,6 @@
 # Correções Realizadas
 
-# Problemas encontrados:
+## Problemas encontrados:
 
 | Arquivo            | Método               | Code Smell             | Descrição                                                  |
 | ------------------ | -------------------- | ---------------------- | ---------------------------------------------------------- |
@@ -11,7 +11,7 @@
 | LibrarySystem.java | handleBorrowBook()   | Primitive Obsession    | Uso de valores mágicos como "email" e "main"               |
 | LibrarySystem.java | handleReturnBook()   | Primitive Obsession    | Uso de valores mágicos como "email", "main" e "handle"     |
 
-# Refatorações Realizadas
+## Refatorações Realizadas
 
 1. Refatoração de Deep Nesting
 
