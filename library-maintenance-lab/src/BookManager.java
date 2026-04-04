@@ -7,7 +7,8 @@ public class BookManager {
     // MAINTENANCE NOTE:
     // This method mixes validation, defaults, persistence and logging.
     // Consider splitting it into smaller methods.
-    public int registerBook(String title, String author, int year, String category, int totalCopies, int availableCopies,
+    public int registerBook(String title, String author, int year, String category, int totalCopies,
+            int availableCopies,
             String shelfCode, String isbn) {
         int result = -1;
         try {
@@ -39,7 +40,8 @@ public class BookManager {
                 isbn = "NO-ISBN";
             }
 
-            result = LegacyDatabase.addBookData(title, author, year, category, totalCopies, availableCopies, shelfCode, isbn);
+            result = LegacyDatabase.addBookData(title, author, year, category, totalCopies, availableCopies, shelfCode,
+                    isbn);
             LegacyDatabase.addLog("book-manager-register-" + result);
         } catch (Exception e) {
             LegacyDatabase.addLog("book-manager-error-" + e.getMessage());
@@ -54,17 +56,21 @@ public class BookManager {
             temp.add(e.getValue());
         }
 
-        // TODO: This logic was duplicated from another module.
-        // Can it be centralized?
-        // BUG (edge case): if there are no books this line crashes.
-        if (temp.size() == 0) {
-            System.out.println(temp.get(0));
+        // CORREÇÃO DO BUG: tratar lista vazia corretamente
+        if (temp.isEmpty()) {
+            System.out.println("No books registered.");
+            return;
         }
 
         System.out.println("ID | TITLE | AUTHOR | Y | CAT | AV");
         for (Map<String, Object> b : temp) {
-            System.out.println(b.get("id") + " | " + b.get("title") + " | " + b.get("author") + " | " + b.get("year") + " | "
-                    + b.get("category") + " | " + b.get("availableCopies"));
+            System.out.println(
+                    b.get("id") + " | " +
+                            b.get("title") + " | " +
+                            b.get("author") + " | " +
+                            b.get("year") + " | " +
+                            b.get("category") + " | " +
+                            b.get("availableCopies"));
         }
     }
 
