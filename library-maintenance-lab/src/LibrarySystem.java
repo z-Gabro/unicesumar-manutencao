@@ -46,6 +46,8 @@ public class LibrarySystem {
                     handleListLoans();
                 } else if ("9".equals(option)) {
                     handleDebugArea();
+                } else if ("10".equals(option)) {
+                    handleUserLoanHistory();
                 } else if ("0".equals(option)) {
                     running = false;
                     System.out.println("bye");
@@ -74,6 +76,7 @@ public class LibrarySystem {
         System.out.println("7 - List users");
         System.out.println("8 - List loans");
         System.out.println("9 - Debug area");
+        System.out.println("10 - User loan history");
         System.out.println("0 - Exit");
         DataUtil.printSeparator();
     }
@@ -148,7 +151,8 @@ public class LibrarySystem {
             int maxDays = DataUtil.askInt("Max days: ", 14);
             int policyCode = DataUtil.askInt("Policy code: ", 0);
 
-            int loanId = loanManager.borrowBook(userId, bookId, borrowDate, dueDate, channel, maxDays, "main", policyCode);
+            int loanId = loanManager.borrowBook(userId, bookId, borrowDate, dueDate, channel, maxDays, "main",
+                    policyCode);
             System.out.println("Loan id " + loanId + " created.");
         } catch (Exception e) {
             System.out.println("Error borrow: " + e.getMessage());
@@ -299,11 +303,22 @@ public class LibrarySystem {
             int idBook = bookManager.registerBook("Legacy Java", "Unknown", 2010, "CS", 2, 2, "B1", "ISBN-999");
             int idUser = userManager.registerUser("Carlos", "carlos@mail.com", "3333-3333", "student", "Maringa",
                     "DOC-3", "ACTIVE");
-            int loanId = loanManager.borrowBook(idUser, idBook, DataUtil.nowDate(), DataUtil.datePlusDaysApprox(DataUtil.nowDate(), 14),
+            int loanId = loanManager.borrowBook(idUser, idBook, DataUtil.nowDate(),
+                    DataUtil.datePlusDaysApprox(DataUtil.nowDate(), 14),
                     "email", 14, "demo", 0);
             loanManager.returnBook(loanId, DataUtil.nowDate(), "email", 0, "demo", "handler");
         } catch (Exception e) {
             LegacyDatabase.addLog("demo-error-" + e.getMessage());
+        }
+    }
+
+    public void handleUserLoanHistory() {
+        try {
+            int userId = DataUtil.askInt("User ID: ", -1);
+            loanManager.printLoanHistoryByUser(userId);
+        } catch (Exception e) {
+            System.out.println("Error fetching history: " + e.getMessage());
+            LegacyDatabase.addLog("handle-history-error");
         }
     }
 

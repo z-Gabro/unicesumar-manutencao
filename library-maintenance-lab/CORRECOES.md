@@ -44,3 +44,33 @@ Depois:
 ```bash
 No books registered.
 ```
+
+## Implementação
+
+### Histórico de Empréstimos por Usuário
+
+Descrição:
+Foi implementada uma funcionalidade que permite visualizar o histórico de empréstimos de um usuário específico.
+
+Como funciona:
+
+- O usuário informa o ID
+- O sistema lista todos os empréstimos associados
+
+Local da implementação:
+
+- LoanManager.java → lógica de busca
+- LibrarySystem.java → integração com CLI
+
+Impacto no sistema:
+
+- Nenhuma alteração nos fluxos existentes
+- Apenas leitura de dados já existentes
+- Baixo acoplamento
+
+Exemplo de uso:
+
+```bash
+10 - User loan history
+User ID: 1
+```
