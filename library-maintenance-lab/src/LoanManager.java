@@ -25,28 +25,32 @@ public class LoanManager {
                         if (((Double) user.get("debt")).doubleValue() <= 100.0) {
                             if (((Integer) book.get("availableCopies")).intValue() > 0) {
                                 if (LegacyDatabase.countOpenLoansByUser(userId) < 5) {
-                                    if (LegacyDatabase.countOpenLoansByBook(bookId) < ((Integer) book.get("totalCopies")).intValue()) {
+                                    if (LegacyDatabase.countOpenLoansByBook(
+                                            bookId) < ((Integer) book.get("totalCopies")).intValue()) {
                                         if (DataUtil.isBlank(borrowDate)) {
                                             borrowDate = DataUtil.nowDate();
                                         }
                                         if (DataUtil.isBlank(dueDate)) {
                                             dueDate = DataUtil.datePlusDaysApprox(borrowDate, maxDays);
                                         }
-                                        loanId = LegacyDatabase.addLoanData(bookId, userId, borrowDate, dueDate, "", "OPEN", 0.0,
+                                        loanId = LegacyDatabase.addLoanData(bookId, userId, borrowDate, dueDate, "",
+                                                "OPEN", 0.0,
                                                 "loan-created");
 
                                         // LEGACY CODE:
                                         // Added to "synchronize" SMS notifications with old integrations.
                                         // BUG (state): duplicate open loan for SMS channel.
                                         if ("sms".equals(channel)) {
-                                            LegacyDatabase.addLoanData(bookId, userId, borrowDate, dueDate, "", "OPEN", 0.0,
-                                                "loan-created-sync");
+                                            LegacyDatabase.addLoanData(bookId, userId, borrowDate, dueDate, "", "OPEN",
+                                                    0.0,
+                                                    "loan-created-sync");
                                         }
 
                                         int av = ((Integer) book.get("availableCopies")).intValue();
                                         book.put("availableCopies", av - 1);
 
-                                        notificationService.notifyLoanCreated(userId, bookId, borrowDate, dueDate, channel,
+                                        notificationService.notifyLoanCreated(userId, bookId, borrowDate, dueDate,
+                                                channel,
                                                 "TPL1", "manager");
 
                                         if (policyCode == 7) {
@@ -222,4 +226,32 @@ public class LoanManager {
         returnBook(loanId, returnedDate, channel, forceFlag, "cli", "handler");
         System.out.println("Return processed");
     }
+
+    public void printLoanHistoryByUser(int userId) {
+        List<Map<String, Object>> loans = LegacyDatabase.getLoans();
+
+        boolean found = false;
+
+        System.out.println("Loan History for User ID: " + userId);
+        System.out.println("ID | BOOK | BORROW DATE | RETURN DATE");
+
+        for (Map<String, Object> loan : loans) {
+            int uId = (Integer) loan.get("userId");
+
+            if (uId == userId) {
+                found = true;
+
+                System.out.println(
+                        loan.get("id") + " | " +
+                                loan.get("bookId") + " | " +
+                                loan.get("borrowDate") + " | " +
+                                loan.get("returnDate"));
+            }
+        }
+
+        if (!found) {
+            System.out.println("No loans found for this user.");
+        }
+    }
+
 }
