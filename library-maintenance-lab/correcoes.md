@@ -13,6 +13,11 @@
 | BookManager.java   | registerBook()       | Long Parameter List    | Muitos parâmetros no mesmo método                          |
 | BookManager.java   | registerBook()       | Validation Smell       | Método permitindo dado inválido (Causa crash)              |
 | BookManager.java   | listBooksSimple()    | Edge Case mal tratado  | Tenta retornar dado de uma lista vazia (Causa crash)       |
+| LoanManager.java   | borrowBook()         | Deep Nesting           | Uso excessivo de if/else aninhados                         |
+| LoanManager.java   | borrowBook()         | Long Method            | Método extenso com múltiplas responsabilidades             |
+| LoanManager.java   | borrowBook()         | Long Parameter List    | Muitos parâmetros no método                                |
+| LoanManager.java   | (classe)             | Tight Coupling         | Dependência instanciada diretamente                        |
+| LoanManager.java   | returnBook()         | IEH                    | Tratamento inconsistente de erro                           |
 
 
 ## Refatorações Realizadas
@@ -58,3 +63,20 @@ Ao invés de permitir o dado inválido e substitui-lo por uma string vazia, o er
 
 Checa se a lista está vazia ao invés de tentar retornar o primeiro valor dela (causando o Crash).
 Caso a lista esteja vazia, retorna uma mensagem dizendo que ela está sem dados.
+
+9. Deep Nesting → Guard Clauses
+Os if aninhados foram substituídos por validações diretas (fail fast), reduzindo complexidade e melhorando legibilidade.
+
+10. Long Method → Simplificação do método
+O método borrowBook() foi reorganizado, reduzindo sua complexidade interna e tornando o fluxo mais linear.
+
+11. Long Parameter List → Parameter Object
+Foi criada a classe BorrowRequest para encapsular os parâmetros do método.
+Além disso, foi mantido o método original, que agora delega para o novo método, garantindo compatibilidade com o sistema.
+
+12. Tight Coupling → Dependency Injection
+A dependência NotificationService passou a ser injetada via construtor.
+Foi mantido um construtor padrão para não quebrar o sistema, reduzindo o acoplamento sem alterar o comportamento externo.
+
+13. Inconsistent Error Handling → Fail Fast
+O método returnBook() foi ajustado para lançar exceções em casos inválidos, evitando falhas silenciosas.
