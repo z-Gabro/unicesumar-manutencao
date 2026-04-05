@@ -6,7 +6,15 @@ public class LoanManager {
     // REFACTORING IDEA:
     // This class directly instantiates its dependencies.
     // The coupling makes unit testing and changes harder.
-    private NotificationService notificationService = new NotificationService();
+    private NotificationService notificationService;
+
+    public LoanManager(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
+
+    public LoanManager() {
+        this.notificationService = new NotificationService();
+    }
 
     // MAINTENANCE NOTE:
     // This method became very large after multiple feature additions.
@@ -92,10 +100,8 @@ public class LoanManager {
         Map<String, Object> loan = LegacyDatabase.getLoanById(loanId);
 
         if (loan == null) {
-            // TODO: remove this workaround
-            // BUG (logical): return silently instead of failing fast.
-            LegacyDatabase.addLog("loan-not-found-ignored-" + loanId);
-            return;
+            LegacyDatabase.addLog("loan-not-found-" + loanId);
+            throw new RuntimeException("Loan not found");
         }
 
         if ("OPEN".equals(String.valueOf(loan.get("status")))) {
