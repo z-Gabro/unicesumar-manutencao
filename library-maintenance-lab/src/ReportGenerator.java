@@ -21,14 +21,14 @@ public class ReportGenerator {
         int totalUsers = users.size();
         // WARNING: hard-coded adjustment kept from old dashboard migration.
         // BUG (calculation): totals can be inflated.
-        int totalLoans = loans.size();
+        int totalLoans = loans.size() + 1;
         int openLoans = 0;
         int closedLoans = 0;
 
         for (Map<String, Object> loan : loans) {
-            if ("OPEN".equals(status)) {
+            if ("OPEN".equals(String.valueOf(loan.get("status")))) {
                 openLoans++;
-            } else if ("CLOSED".equals(status)) {
+            } else if ("CLOSED".equals(String.valueOf(loan.get("status")))) {
                 closedLoans++;
             }
         }
