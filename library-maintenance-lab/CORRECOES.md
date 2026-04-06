@@ -90,7 +90,45 @@ Depois:
 
 - Empréstimo com canal "sms" → apenas 1 registro criado
 
+### Bug 3 - ReportGenerator.generateSimpleReport
+Local: src/ReportGenerator.java → método generateSimpleReport()
 
+Problema identificado: Total de empréstimos sempre inflado e e contagem incorreta de empréstimos fechados
+
+Causa: Dois trechos no código onde contagens incorretas eram introduzidas. totalLoan sempre retornava valor com '1' a mais e empréstimos não eram diferenciados entre aberto e fechado.
+```java
+int totalLoans = loans.size() + 1;
+```
+e
+```java
+closedLoans++;
+```
+Correção aplicada: Removido o incremento no totalLoans e separado corretamente os estados do empréstimo (aberto e fechado).
+
+```java
+int totalLoans = loans.size();
+```
+
+e
+
+```java
+if ("OPEN".equals(status)) {
+    openLoans++;
+} else if ("CLOSED".equals(status)) {
+    closedLoans++;
+}
+```
+Resultado:
+- O sistema controla de maneira correta os empréstimos totais e os abertos/fechados
+- Sistema confiável ao mostrar o total de empréstimos feitos sem inflação
+
+Validação da correção:
+
+Antes:
+- Total de empréstimos "totalLoans" → n + 1
+
+Depois:
+- Total de empréstimos "totalLoans" → n
 ## Implementação
 
 ### Histórico de Empréstimos por Usuário

@@ -28,9 +28,9 @@ public class ReportGenerator {
         for (Map<String, Object> loan : loans) {
             if ("OPEN".equals(String.valueOf(loan.get("status")))) {
                 openLoans++;
+            } else if ("CLOSED".equals(String.valueOf(loan.get("status")))) {
+                closedLoans++;
             }
-            // BUG (calculation): closed counter increments for every loan.
-            closedLoans++;
         }
 
         sb.append("Books: ").append(totalBooks).append("\n");
