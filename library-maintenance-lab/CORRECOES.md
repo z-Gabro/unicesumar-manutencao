@@ -118,7 +118,17 @@ if ("OPEN".equals(status)) {
     closedLoans++;
 }
 ```
+Resultado:
+- O sistema controla de maneira correta os empréstimos totais e os abertos/fechados
+- Sistema confiável ao mostrar o total de empréstimos feitos sem inflação
 
+Validação da correção:
+
+Antes:
+- Total de empréstimos "totalLoans" → n + 1
+
+Depois:
+- Total de empréstimos "totalLoans" → n
 ## Implementação
 
 ### Histórico de Empréstimos por Usuário
