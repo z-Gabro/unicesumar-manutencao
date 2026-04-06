@@ -44,6 +44,52 @@ Depois:
 ```bash
 No books registered.
 ```
+### Bug 2 - LoanManager.borrowBook()
+
+Local:
+src/LoanManager.java → método borrowBook()
+
+Problema identificado:
+Ao realizar um empréstimo com o canal "sms", o sistema criava empréstimos duplicados para o mesmo usuário e livro.
+
+Causa:
+Existia um trecho de código legado que adicionava um segundo empréstimo apenas para sincronização com integrações antigas:
+
+```java
+if ("sms".equals(channel)) {
+    LegacyDatabase.addLoanData(bookId, userId, borrowDate, dueDate, "", "OPEN",
+            0.0,
+            "loan-created-sync");
+}
+```
+
+Esse comportamento gerava inconsistência de estado, pois criava dois registros de empréstimo abertos para a mesma operação.
+
+Correção aplicada:
+Remoção da criação duplicada de empréstimos, mantendo apenas um registro por operação.
+
+```java
+// REMOVIDO: criação duplicada para canal SMS
+// if ("sms".equals(channel)) {
+//     LegacyDatabase.addLoanData(...);
+// }
+```
+Resultado:
+
+- Cada operação de empréstimo gera apenas um único registro
+- Eliminação de inconsistências na base de dados
+- Contagem correta de empréstimos por usuário e por livro
+- Sistema mais previsível e estável
+
+Validação da Correção
+Antes:
+
+- Empréstimo com canal "sms" → 2 registros criados
+
+Depois:
+
+- Empréstimo com canal "sms" → apenas 1 registro criado
+
 
 ## Implementação
 
