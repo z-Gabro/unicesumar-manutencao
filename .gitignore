@@ -1,8 +1,23 @@
 # Compiled class file
 *.class
 
+# Maven build output
+target/
+
+# IDE metadata
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
 # Log file
 *.log
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # BlueJ files
 *.ctxt
