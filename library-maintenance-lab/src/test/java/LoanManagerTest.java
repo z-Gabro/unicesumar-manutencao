@@ -1,5 +1,4 @@
 import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,5 +32,13 @@ public class LoanManagerTest {
         double fine = loanManager.calculateFineLegacy("2026-05-10", "2026-05-10", 0, "teste", "helper", 1, 2);
 
         assertEquals(0.0, fine, 0.0001);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void deveFalharQuandoLoanNaoExiste() {
+        LoanManager lm = new LoanManager();
+
+        // ID inexistente
+        lm.returnBook(9999, null, "email", 0, "test", "test");
     }
 }
