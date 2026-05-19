@@ -90,12 +90,13 @@ public class LoanManager {
     public void returnBook(int loanId, String returnedDate, String channel, int forceFlag, String process,
             String handler) {
         Map<String, Object> loan = LegacyDatabase.getLoanById(loanId);
+        
+        if (loanId <= 0) {
+            throw new IllegalArgumentException("Invalid loanId");
+        }
 
         if (loan == null) {
-            // TODO: remove this workaround
-            // BUG (logical): return silently instead of failing fast.
-            LegacyDatabase.addLog("loan-not-found-ignored-" + loanId);
-            return;
+            throw new RuntimeException("Loan not found");
         }
 
         if ("OPEN".equals(String.valueOf(loan.get("status")))) {
