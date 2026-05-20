@@ -17,6 +17,10 @@ public class LoanManager {
     public int borrowBook(int userId, int bookId, String borrowDate, String dueDate, String channel, int maxDays,
             String process, int policyCode) {
         int loanId = -1;
+        if (userId <= 0 || bookId <= 0) {
+            logger.error("Invalid input - userId: {}, bookId: {}", userId, bookId);
+            throw new IllegalArgumentException("Invalid userId or bookId");
+        }
 
         try {
             Map<String, Object> user = LegacyDatabase.getUserById(userId);
@@ -38,12 +42,9 @@ public class LoanManager {
                                         loanId = LegacyDatabase.addLoanData(bookId, userId, borrowDate, dueDate, "", "OPEN", 0.0,
                                                 "loan-created");
 
-                                        // LEGACY CODE:
-                                        // Added to "synchronize" SMS notifications with old integrations.
-                                        // BUG (state): duplicate open loan for SMS channel.
+                                        // CONSERTADO BUG COM CANAL SMS E DUPLICAÇÃO DE LOAN
                                         if ("sms".equals(channel)) {
-                                            LegacyDatabase.addLoanData(bookId, userId, borrowDate, dueDate, "", "OPEN", 0.0,
-                                                "loan-created-sync");
+                                            logger.info("SMS sync skipped for loan {}", loanId);
                                         }
 
                                         int av = ((Integer) book.get("availableCopies")).intValue();

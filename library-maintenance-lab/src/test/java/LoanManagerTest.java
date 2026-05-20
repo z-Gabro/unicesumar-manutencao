@@ -2,6 +2,9 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+import java.util.Map;
+
 public class LoanManagerTest {
 
     @Before
@@ -40,5 +43,24 @@ public class LoanManagerTest {
 
         // ID inexistente
         lm.returnBook(9999, null, "email", 0, "test", "test");
+    }
+
+    @Test
+    public void naoDeveDuplicarLoanQuandoCanalSms() {
+        LoanManager manager = new LoanManager();
+
+        int loanId = manager.borrowBook(
+                1, 1, null, null,
+                "sms", 14, "test", 0
+        );
+
+        List<Map<String, Object>> loans = LegacyDatabase.getLoans();
+
+        long count = loans.stream()
+                .filter(l -> ((Integer) l.get("userId")) == 1
+                        && ((Integer) l.get("bookId")) == 1)
+                .count();
+
+        assertEquals(1, count);
     }
 }
