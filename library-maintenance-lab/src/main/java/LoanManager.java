@@ -1,8 +1,11 @@
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class LoanManager {
 
+    private static final Logger logger = LogManager.getLogger(LoanManager.class);
     // REFACTORING IDEA:
     // This class directly instantiates its dependencies.
     // The coupling makes unit testing and changes harder.
@@ -14,6 +17,10 @@ public class LoanManager {
     public int borrowBook(int userId, int bookId, String borrowDate, String dueDate, String channel, int maxDays,
             String process, int policyCode) {
         int loanId = -1;
+        if (userId <= 0 || bookId <= 0) {
+            logger.error("Invalid input - userId: {}, bookId: {}", userId, bookId);
+            throw new IllegalArgumentException("Invalid userId or bookId");
+        }
 
         try {
             Map<String, Object> user = LegacyDatabase.getUserById(userId);
@@ -35,12 +42,9 @@ public class LoanManager {
                                         loanId = LegacyDatabase.addLoanData(bookId, userId, borrowDate, dueDate, "", "OPEN", 0.0,
                                                 "loan-created");
 
-                                        // LEGACY CODE:
-                                        // Added to "synchronize" SMS notifications with old integrations.
-                                        // BUG (state): duplicate open loan for SMS channel.
+                                        // CONSERTADO BUG COM CANAL SMS E DUPLICAÇÃO DE LOAN
                                         if ("sms".equals(channel)) {
-                                            LegacyDatabase.addLoanData(bookId, userId, borrowDate, dueDate, "", "OPEN", 0.0,
-                                                "loan-created-sync");
+                                            logger.info("SMS sync skipped for loan {}", loanId);
                                         }
 
                                         int av = ((Integer) book.get("availableCopies")).intValue();
@@ -88,57 +92,87 @@ public class LoanManager {
     }
 
     public void returnBook(int loanId, String returnedDate, String channel, int forceFlag, String process,
-            String handler) {
+        String handler) {
+
+        if (loanId <= 0) {
+            logger.error("Invalid loanId provided: {}", loanId);
+            throw new IllegalArgumentException("Invalid loanId");
+        }
+
         Map<String, Object> loan = LegacyDatabase.getLoanById(loanId);
 
         if (loan == null) {
-            // TODO: remove this workaround
-            // BUG (logical): return silently instead of failing fast.
-            LegacyDatabase.addLog("loan-not-found-ignored-" + loanId);
-            return;
+            logger.error("Loan not found for id {}", loanId);
+            throw new RuntimeException("Loan not found");
         }
 
         if ("OPEN".equals(String.valueOf(loan.get("status")))) {
+
             int userId = ((Integer) loan.get("userId")).intValue();
             int bookId = ((Integer) loan.get("bookId")).intValue();
+
             Map<String, Object> user = LegacyDatabase.getUserById(userId);
             Map<String, Object> book = LegacyDatabase.getBookById(bookId);
 
             if (user != null && book != null) {
+
                 if (DataUtil.isBlank(returnedDate)) {
                     returnedDate = DataUtil.nowDate();
                 }
+
                 loan.put("returnedDate", returnedDate);
                 loan.put("status", "CLOSED");
 
-                double fine = calculateFineLegacy(String.valueOf(loan.get("dueDate")), returnedDate, forceFlag, process,
-                        handler, userId, bookId);
+                double fine = calculateFineLegacy(
+                        String.valueOf(loan.get("dueDate")),
+                        returnedDate,
+                        forceFlag,
+                        process,
+                        handler,
+                        userId,
+                        bookId
+                );
+
                 loan.put("fine", fine);
 
-                int av = ((Integer) book.get("availableCopies")).intValue();
-                int total = ((Integer) book.get("totalCopies")).intValue();
+                if (fine > 0) {
+                    double debt = ((Double) user.get("debt")).doubleValue();
+
+                    debt = debt + fine;
+
+                    user.put("debt", debt);
+
+                    logger.info(
+                            "Debt updated for user {}. Added fine: {}, New debt: {}",
+                            userId,
+                            fine,
+                            debt
+                    );
+                }
+                int av = ((Integer) book.get("availableCopies"));
+                int total = ((Integer) book.get("totalCopies"));
+
                 av = av + 1;
                 if (av > total) {
                     av = total;
                 }
+
                 book.put("availableCopies", av);
 
-                if (fine > 0) {
-                    double debt = ((Double) user.get("debt")).doubleValue();
-                    // BUG (calculation/state): should increase debt, not decrease.
-                    debt = debt - fine;
-                    user.put("debt", debt);
-                }
-
                 notificationService.notifyReturn(userId, bookId, "CLOSED", fine, channel);
-                LegacyDatabase.addLog("loan-return-ok-" + loanId + "-" + process + "-" + handler);
+
+                logger.info("Loan {} successfully returned by user {}", loanId, userId);
+
             } else {
+                logger.error("User or book missing for loan {}", loanId);
                 throw new RuntimeException("user/book missing for return");
             }
+
         } else {
+            logger.error("Attempt to return already closed loan {}", loanId);
             throw new RuntimeException("loan already closed");
         }
-    }
+}
 
     // outdated: this now compares strings lexicographically, not real dates
     public double calculateFineLegacy(String dueDate, String returnedDate, int forceFlag, String process, String helper,
