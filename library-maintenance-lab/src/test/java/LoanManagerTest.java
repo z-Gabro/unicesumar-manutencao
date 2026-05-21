@@ -1,9 +1,9 @@
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.List;
-import java.util.Map;
 
 public class LoanManagerTest {
 
@@ -63,4 +63,35 @@ public class LoanManagerTest {
 
         assertEquals(1, count);
     }
+
+    @Test
+    public void deveSomarMultaNaDividaDoUsuario() {
+        LoanManager manager = new LoanManager();
+
+        int loanId = manager.borrowBook(
+                1, 1,
+                "2026-05-01",
+                "2026-05-01",
+                "email",
+                14,
+                "test",
+                0
+        );
+
+        manager.returnBook(
+                loanId,
+                "2026-05-05", // atraso
+                "email",
+                0,
+                "test",
+                "test"
+        );
+
+        Map<String, Object> user = LegacyDatabase.getUserById(1);
+
+        double debt = ((Double) user.get("debt"));
+
+        // Espera dívida > 0
+        assertEquals(true, debt > 0);
+}
 }
