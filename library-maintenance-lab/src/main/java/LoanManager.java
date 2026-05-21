@@ -135,6 +135,20 @@ public class LoanManager {
 
                 loan.put("fine", fine);
 
+                if (fine > 0) {
+                    double debt = ((Double) user.get("debt")).doubleValue();
+
+                    debt = debt + fine;
+
+                    user.put("debt", debt);
+
+                    logger.info(
+                            "Debt updated for user {}. Added fine: {}, New debt: {}",
+                            userId,
+                            fine,
+                            debt
+                    );
+                }
                 int av = ((Integer) book.get("availableCopies"));
                 int total = ((Integer) book.get("totalCopies"));
 
