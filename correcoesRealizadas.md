@@ -1,8 +1,8 @@
 # Correções Atividade 4 - Segundo Bimestre
 
-### Erros SonarQube
+## Erros SonarQube
 
-O SonarQube encontrou era de 213 code smells em  todos os arquivos, por isso, decidimos focar somente nos erros da classe LoanManager.
+O SonarQube encontrou cerca de 213 code smells em  todos os arquivos, por isso, decidimos focar somente nos erros da classe LoanManager.
 
 SonarQube:
 
