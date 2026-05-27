@@ -7,3 +7,7 @@ Fizemos essa separação visando facilitar a comparação do que foi realizado e
 ## Atividade 3 - Segundo Bimestre
 
 Todas as correções, testes e o vídeos estão na branch "ativ3_segundoBim"
+
+## Atividade 4 - Segundo Bimestre
+
+Todas as correções, testes e o vídeos estão na branch "ativ4_segundoBim"
