@@ -9,6 +9,7 @@ use App\Http\Requests\AgendamentoRequest;
 use App\Http\Requests\AgendamentoEditRequest;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Str;
+use App\Services\GoogleCalendarService;
 use PDF;
 
 class AgendamentoController extends Controller
@@ -65,6 +66,8 @@ class AgendamentoController extends Controller
 
         try {
             $agendamento->save();
+            $googleCalendarService = new GoogleCalendarService();
+            $googleCalendarService->sync($agendamento);
         } catch (QueryException $exception) {
             if (Str::contains($exception->getMessage(), 'A estação de trabalho deve ser uma estação ativa do estúdio.')) $msg = 'A estação de trabalho deve ser uma estação ativa do estúdio.';
                 elseif (Str::contains($exception->getMessage(), 'O status do agendamento deve ser um status de agendamento ativo do estúdio.')) $msg = 'O status do agendamento deve ser um status de agendamento ativo do estúdio.';
